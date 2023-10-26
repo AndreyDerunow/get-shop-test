@@ -1,5 +1,4 @@
 {
-    "homepage": "https://andreyderunow.github.io/get-Shop-Test",
     "name": "getshoptest",
     "private": true,
     "version": "0.0.0",
@@ -7,9 +6,7 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "preview": "vite preview",
-        "predeploy": "vite build",
-        "deploy": "gh-pages -d dist"
+        "preview": "vite preview"
     },
     "dependencies": {
         "nanoid": "^5.0.2",
