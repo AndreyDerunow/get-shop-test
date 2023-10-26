@@ -28,8 +28,8 @@ const PhoneField = ({
             <input
                 ref={reference}
                 className={
-                    (isValid === "panding" ? "text-black" : "text-[#EA0000]") +
-                    " w-[267px] caret-transparent font-[Roboto] bg-[#86D3F4] h-[67px] font-bold text-[32px] leading-[37.5px] outline-none text-center"
+                    (isValid === "panding" ? "text-black" : "text-errorColor") +
+                    " w-[267px] caret-transparent font-[Roboto] bg-mainColor h-[67px] font-bold text-[32px] leading-[37.5px] outline-none text-center"
                 }
                 type="text"
                 id="phone"

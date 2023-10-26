@@ -1,13 +1,28 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import VideoBanner from "./VideoBanner";
 import YouTube, { YouTubeProps } from "react-youtube";
 import Panel from "./Panel";
+import { IkeyEvent } from "../../interfaces";
 
 const Video = () => {
     const [showBanner, setShowBanner] = useState<boolean>(false);
     const [panelShowed, setPanelShowed] = useState<boolean>(false);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const bannerButtonRef = useRef<HTMLButtonElement>(null);
+    const [alreadyOpened, setAlreadyOpened] = useState<boolean>(false);
+    useEffect(() => {
+        if (!panelShowed) {
+            setTimeout(
+                () => {
+                    window.addEventListener("keydown", handleopenPanel);
+                    if (!alreadyOpened) {
+                        setAlreadyOpened(() => true);
+                    }
+                },
+                alreadyOpened ? 0 : 5000
+            );
+        }
+    }, [panelShowed]);
     const onPlayerReady: YouTubeProps["onReady"] = ({ target }) => {
         target.mute();
         target.playVideo();
@@ -43,9 +58,15 @@ const Video = () => {
             modestbranding: 1
         }
     };
+    const handleopenPanel = useCallback((e: IkeyEvent): void => {
+        if (e.keyCode === 13 && !panelShowed) {
+            e.preventDefault();
+            bannerButtonRef.current && bannerButtonRef.current.click();
+            window.removeEventListener("keydown", handleopenPanel);
+        }
+    }, []);
     return (
         <div className="w-[1280px] h-[720px] relative">
-            <div className="flex justify-center items-center opacity-0 bg-[url('assets/van_damme_volvo.jpg')] bg-[3px] bg-cover w-[1280px] h-[720px] absolute"></div>
             <YouTube
                 className="w-full h-full"
                 videoId="M7FIvfx5J10"
@@ -55,10 +76,9 @@ const Video = () => {
             />
             {panelShowed && (
                 <Panel
+                    bannerButtonRef={bannerButtonRef}
                     closeButtonRef={closeButtonRef}
-                    onClose={() => {
-                        setPanelShowed(() => false);
-                    }}
+                    onClose={() => setPanelShowed(() => false)}
                 />
             )}
             {showBanner && (

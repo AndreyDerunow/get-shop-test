@@ -27,34 +27,34 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
     const phoneRef = useRef<string | null>(null);
     const isPhoneValidRef = useRef<boolean | "panding" | null>(null);
     const isAllPassedRef = useRef<boolean | null>(null);
-    phoneRef.current = phone;
-    isPhoneValidRef.current = isPhoneValid;
+    selectedRef.current = selected;
     isAllPassedRef.current = isAllPassed;
+    isPhoneValidRef.current = isPhoneValid;
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const getButtons = (): string[][] => {
+        const result = [];
+        const infoAgree = ["infoAgree"];
+        const confirm = ["confirm"];
+        const close = ["close"];
+        const phone = [
+            ["1", "2", "3"],
+            ["4", "5", "6"],
+            ["7", "8", "9"],
+            ["0", "СТЕРЕТЬ"]
+        ];
+        if (isPhoneValidRef.current != true) result.push(...phone);
+        if (isPhoneValidRef.current == "panding") result.push(infoAgree);
+        if (isAllPassedRef.current && !(isPhoneValid == true))
+            result.push(confirm);
+        result.push(close);
+        return result;
+    };
+    const buttons = getButtons();
+    const buttonsRef = useRef<string[][] | null>(null);
+    buttonsRef.current = buttons;
     const phoneInputRef = useRef<HTMLInputElement>(null);
-    let timeout: ReturnType<typeof setTimeout>;
-    const buttons =
-        isPhoneValidRef.current == true
-            ? [["close"]]
-            : !isAllPassedRef.current
-            ? [
-                  ["1", "2", "3"],
-                  ["4", "5", "6"],
-                  ["7", "8", "9"],
-                  ["0", "СТЕРЕТЬ"],
-                  ["infoAgree"],
-                  ["close"]
-              ]
-            : [
-                  ["1", "2", "3"],
-                  ["4", "5", "6"],
-                  ["7", "8", "9"],
-                  ["0", "СТЕРЕТЬ"],
-                  ["infoAgree"],
-                  ["confirm"],
-                  ["close"]
-              ];
+    phoneRef.current = phone;
     useEffect(() => {
-        selectedRef.current = selected;
         document.addEventListener("keydown", arrowController);
         return () => document.removeEventListener("keydown", arrowController);
     }, [selected]);
@@ -68,6 +68,7 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
             }
         );
         return () => {
+            clearTimeout(timeoutRef.current!);
             ["click", "contextmenu", "mousemove", "keydown", "wheel"].forEach(
                 (e) => {
                     window.removeEventListener(e, trackUserMoves);
@@ -79,7 +80,7 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
         setIsAllPassed(() => phone.length === 12 && infoAgree);
     }, [phone.length, infoAgree]);
     const arrowController = useCallback((e: IkeyEvent): void => {
-        if (selectedRef.current && phoneRef.current) {
+        if (selectedRef.current && phoneRef.current && buttonsRef.current) {
             const { x, y } = selectedRef.current;
             switch (e.keyCode) {
                 case 8:
@@ -94,7 +95,7 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                     e.preventDefault();
                     trackUserMoves();
                     if (x !== "none" && y !== "none") {
-                        switch (buttons[y][x]) {
+                        switch (buttonsRef.current[y][x]) {
                             case "СТЕРЕТЬ":
                                 if (phoneRef.current.length > 2) {
                                     resumePanding();
@@ -112,13 +113,17 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                                 (
                                     closeButtonRef.current as HTMLButtonElement
                                 ).click();
+
                                 break;
                             case "infoAgree":
                                 setInfoAgree((prev) => !prev);
                                 break;
                             default:
                                 if (phoneRef.current.length < 12) {
-                                    setPhone((prev) => prev + buttons[y][x]);
+                                    setPhone(
+                                        (prev) =>
+                                            prev + buttonsRef.current![y][x]
+                                    );
                                 }
                                 break;
                         }
@@ -128,15 +133,21 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                     e.preventDefault();
                     trackUserMoves();
                     if (x === "none") {
-                        setSelected(() => getCoords("4", buttons));
+                        setSelected(() => getCoords("4", buttonsRef.current!));
+                    } else if (buttonsRef.current.length === 1) {
+                        setSelected(() => ({
+                            x: 0,
+                            y: 0
+                        }));
                     } else {
-                        const updatedY = +y !== buttons.length - 1 ? +y : 0;
+                        const updatedY =
+                            +y !== buttonsRef.current.length - 1 ? +y : 0;
                         const updatedX =
                             +x - 1 > -1
                                 ? +x - 1
-                                : +y !== buttons.length - 1
+                                : +y !== buttonsRef.current.length - 1
                                 ? +x
-                                : buttons[0].length - 1;
+                                : buttonsRef.current[0].length - 1;
                         setSelected(() => ({
                             x: updatedX,
                             y: updatedY
@@ -147,16 +158,23 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                     e.preventDefault();
                     trackUserMoves();
                     if (x === "none") {
-                        setSelected(() => getCoords("2", buttons));
+                        setSelected(() => getCoords("2", buttonsRef.current!));
+                    } else if (buttonsRef.current.length === 1) {
+                        setSelected(() => ({
+                            x: 0,
+                            y: 0
+                        }));
                     } else {
                         const updatedY =
-                            +y - 1 > -1 ? +y - 1 : buttons.length - 1;
+                            +y - 1 > -1
+                                ? +y - 1
+                                : buttonsRef.current.length - 1;
                         const updatedX =
-                            y === buttons.length - 1
+                            y === buttonsRef.current.length - 1
                                 ? 0
-                                : buttons[updatedY].length - 1 >= +x
+                                : buttonsRef.current[updatedY].length - 1 >= +x
                                 ? x
-                                : buttons[updatedY].length - 1;
+                                : buttonsRef.current[updatedY].length - 1;
                         setSelected(() => ({
                             x: updatedX,
                             y: updatedY
@@ -167,14 +185,21 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                     e.preventDefault();
                     trackUserMoves();
                     if (x === "none") {
-                        setSelected(() => getCoords("6", buttons));
+                        setSelected(() => getCoords("6", buttonsRef.current!));
+                    } else if (buttonsRef.current.length === 1) {
+                        setSelected(() => ({
+                            x: 0,
+                            y: 0
+                        }));
                     } else {
                         const updatedY =
-                            +x !== buttons[+y].length - 1
+                            +x !== buttonsRef.current[+y].length - 1
                                 ? +y
-                                : buttons.length - 1;
+                                : buttonsRef.current.length - 1;
                         const updatedX =
-                            +x + 1 <= buttons[+y].length - 1 ? +x + 1 : 0;
+                            +x + 1 <= buttonsRef.current[+y].length - 1
+                                ? +x + 1
+                                : 0;
                         setSelected(() => ({
                             x: updatedX,
                             y: updatedY
@@ -185,16 +210,23 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                     e.preventDefault();
                     trackUserMoves();
                     if (x === "none") {
-                        setSelected(() => getCoords("8", buttons));
+                        setSelected(() => getCoords("8", buttonsRef.current!));
+                    } else if (buttonsRef.current.length === 1) {
+                        setSelected(() => ({
+                            x: 0,
+                            y: 0
+                        }));
                     } else {
                         const updatedY =
-                            +y + 1 <= buttons.length - 1 ? +y + 1 : 0;
+                            +y + 1 <= buttonsRef.current.length - 1
+                                ? +y + 1
+                                : 0;
                         const updatedX =
-                            +y === buttons.length - 1
+                            +y === buttonsRef.current.length - 1
                                 ? 0
-                                : buttons[updatedY].length - 1 >= +x
+                                : buttonsRef.current[updatedY].length - 1 >= +x
                                 ? x
-                                : buttons[updatedY].length - 1;
+                                : buttonsRef.current[updatedY].length - 1;
                         setSelected(() => ({
                             x: updatedX,
                             y: updatedY
@@ -207,10 +239,15 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
         }
     }, []);
     const trackUserMoves = useCallback(() => {
-        if (timeout) {
-            clearTimeout(timeout);
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
         }
-        timeout = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
+            ["click", "contextmenu", "mousemove", "keydown", "wheel"].forEach(
+                (e) => {
+                    window.removeEventListener(e, trackUserMoves);
+                }
+            );
             closeButtonRef &&
                 closeButtonRef.current &&
                 closeButtonRef.current.click();
@@ -218,7 +255,10 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
     }, []);
     const handleClick = ({ target }: React.MouseEvent<HTMLButtonElement>) => {
         setSelected(() =>
-            getCoords((target as HTMLButtonElement).id.toString(), buttons)
+            getCoords(
+                (target as HTMLButtonElement).id.toString(),
+                buttonsRef.current!
+            )
         );
         if ((target as HTMLButtonElement).id.toString() === "СТЕРЕТЬ") {
             if (phoneRef.current && phoneRef.current.length > 2) {
@@ -266,12 +306,12 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                         selected={
                             typeof selected.y === "number" &&
                             typeof selected.x === "number"
-                                ? buttons[selected.y][selected.x]
+                                ? buttonsRef.current![selected.y][selected.x]
                                 : "none"
                         }
                         isPhoneValid={isPhoneValid}
                         confirmButtonRef={confirmButtonRef}
-                        buttons={buttons}
+                        buttons={buttonsRef.current}
                         onClick={handleClick}
                         infoAgree={infoAgree}
                         onChange={handleChange}
@@ -284,19 +324,16 @@ const Panel = ({ onClose, closeButtonRef }: Omit<IbuttonProps, "onOpen">) => {
                 {isValidating && <Loader />}
                 {isPhoneValid == true && <Info />}
             </div>
-
-            {
-                <CloseButton
-                    reference={closeButtonRef}
-                    onClick={onClose}
-                    selected={
-                        typeof selected.y === "number" &&
-                        typeof selected.x === "number"
-                            ? buttons[selected.y][selected.x]
-                            : "none"
-                    }
-                />
-            }
+            <CloseButton
+                reference={closeButtonRef}
+                onClick={onClose}
+                selected={
+                    typeof selected.y === "number" &&
+                    typeof selected.x === "number"
+                        ? buttonsRef.current![selected.y][selected.x]
+                        : "none"
+                }
+            />
             <PanelBanner />
         </div>
     );

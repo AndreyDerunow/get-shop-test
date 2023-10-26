@@ -40,6 +40,7 @@ export interface IphonePannel {
 
 export interface IbuttonProps extends React.ComponentProps<"button"> {
     closeButtonRef: RefObject<HTMLButtonElement>;
+    bannerButtonRef: RefObject<HTMLButtonElement>;
     onClose: MouseEventHandler<HTMLButtonElement>;
 }
 

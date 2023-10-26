@@ -18,7 +18,7 @@ const CheckboxField = ({
                 className={
                     (selected === "infoAgree" && value
                         ? "text-black"
-                        : "text-[#565656]") +
+                        : "text-brownGray") +
                     " transition-all block text-[14px] leading-[16.41px] ml-[80px]"
                 }
                 htmlFor="infoAgree"

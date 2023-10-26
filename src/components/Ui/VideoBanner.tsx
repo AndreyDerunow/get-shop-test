@@ -3,7 +3,7 @@ import QRCode from "react-qr-code";
 import { IpanelButton } from "../../interfaces";
 const VideoBanner = ({ onClick, reference }: Partial<IpanelButton>) => {
     return (
-        <div className="w-[251px] h-[357px] bg-[#86D3F4] p-[30px_10px] flex flex-col gap-[20px] text-black items-center text-center absolute right-0 bottom-8">
+        <div className="w-[251px] h-[357px] bg-mainColor p-[30px_10px] flex flex-col gap-[20px] text-black items-center text-center absolute right-0 bottom-8">
             <div className="w-[231px] h-[57px] font-medium text-[16px] leading-[18.75px]">
                 ИСПОЛНИТЕ МЕЧТУ ВАШЕГО <br />
                 МАЛЫША! <br />
@@ -23,7 +23,7 @@ const VideoBanner = ({ onClick, reference }: Partial<IpanelButton>) => {
             <button
                 ref={reference}
                 onClick={onClick}
-                className="w-[156px] h-[52px] p-[16px] font-medium text-[16px] bg-black text-[#86D3F4] leading-[18.75px]"
+                className="w-[156px] h-[52px] p-[16px] font-medium text-[16px] bg-black text-mainColor leading-[18.75px]"
             >
                 ОК
             </button>

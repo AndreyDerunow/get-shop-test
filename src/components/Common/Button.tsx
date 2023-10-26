@@ -19,7 +19,7 @@ const Button = ({
             case "confirm":
                 classes =
                     "text-[#4E4E4E] p-[16px_19px] w-[284px] border border-[#4E4E4E]" +
-                    (disabled ? "" : "cursor-pointer scale-110");
+                    (disabled ? "" : "cursor-pointer animate-bounce-x1");
                 break;
             case "close":
                 classes =
@@ -37,9 +37,6 @@ const Button = ({
                 : " border-black";
         return classes;
     };
-    // confirm  // className=" text-[#4E4E4E] p-[16px_19px] w-[284px] border border-[#4E4E4E]"
-    // close  // className="w-[88px] bg-white flex items-center justify-center border-2 absolute top-[20px] left-[1172px] z-[3]"
-
     return (
         <button
             disabled={disabled}
